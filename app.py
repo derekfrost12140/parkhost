@@ -8,12 +8,16 @@ import logging
 from ultralytics import YOLO
 import supervision as sv
 
+# Set up basic configuration for logging
+logging.basicConfig(level=logging.INFO)
+
 app = Flask(__name__)
 
-# Allow both Netlify for CORS
-cors_origins = ["https://your-netlify-domain.netlify.app"]
+# Specify your Netlify domain in the CORS settings
+cors_origins = ["https://main--bespoke-concha-8d1e60.netlify.app"]
 
-CORS(app, supports_credentials=True, origins=cors_origins)
+# Enable CORS for all routes and specify origins to allow
+CORS(app, resources={r"/*": {"origins": cors_origins}}, supports_credentials=True)
 
 # Load YOLO model
 model_url = os.getenv("MODEL_URL", "default_model_url_here")
@@ -25,7 +29,7 @@ def index():
     return send_from_directory('templates', 'lot.html')
 
 @app.route('/process', methods=['POST'])
-@cross_origin(origins=cors_origins)  # Set CORS for this endpoint
+@cross_origin()  # Apply CORS for this endpoint
 def process_video():
     try:
         video_url = request.json['url']
@@ -49,7 +53,7 @@ def process_video():
         out.release()
         return jsonify({'message': 'Processing complete', 'video': f'/videos/{output_filename}'})
     except Exception as e:
-        logging.error(f"Failed to process video: {str(e)}")
+        logging.error("Failed to process video: %s", e)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/videos/<filename>')
