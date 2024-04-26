@@ -10,10 +10,10 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     git  # Ensure git is installed
 
-# Clone YOLOv5 and checkout the specific version
-RUN git clone https://github.com/ultralytics/yolov5.git && \
-    cd yolov5 && \
-    git checkout v6.0
+# Clone YOLOv5 and install dependencies
+RUN git clone --depth 1 --branch v6.0 https://github.com/ultralytics/yolov5.git yolov5
+WORKDIR /app/yolov5
+RUN pip install -r requirements.txt
 
 # Install YOLOv5 dependencies from the cloned directory
 RUN pip install --no-cache-dir -r /app/yolov5/requirements.txt
