@@ -6,5 +6,6 @@ torchvision==0.17.1
 pyyaml
 uuid
 gunicorn
-git+https://github.com/ultralytics/yolov5  # This adds YOLOv5 directly from the repository
+git+https://github.com/ultralytics/yolov5.git@v6.0#egg=yolov5
+
 
