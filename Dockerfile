@@ -15,9 +15,8 @@ RUN git clone https://github.com/ultralytics/yolov5.git && \
     cd yolov5 && \
     git checkout v6.0
 
-# Install YOLOv5 dependencies
-COPY yolov5/requirements.txt /app/yolov5_requirements.txt
-RUN pip install --no-cache-dir -r yolov5_requirements.txt
+# Install YOLOv5 dependencies from the cloned directory
+RUN pip install --no-cache-dir -r /app/yolov5/requirements.txt
 
 # Copy only the requirements file first to leverage Docker cache
 COPY requirements.txt /app/
