@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 # Define environment variable
-ENV MODEL_PATH=best.pt  # Assuming best.pt is in the /app directory
+ENV MODEL_PATH=best.pt  
 
 # Run app.py when the container launches
 CMD ["python", "app.py"]
