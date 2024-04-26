@@ -5,7 +5,9 @@ import cv2
 import uuid
 import tempfile
 import logging
-from ultralytics import YOLO
+# Assuming YOLOv5's `models` and `utils` directories are correctly set in PYTHONPATH
+from models.experimental import attempt_load
+from utils.torch_utils import select_device
 
 # Set up basic configuration for logging
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +22,8 @@ CORS(app, resources={r"/*": {"origins": cors_origins}}, supports_credentials=Tru
 
 # Load YOLO model from a local file or URL
 model_path = os.getenv("MODEL_PATH", "best.pt")  # Use local path for Docker deployment
-model = YOLO(model_path)
+device = select_device('cpu')  # or 'cuda' if GPU is available
+model = attempt_load(model_path, map_location=device)  # Load model
 classNames = ["Empty", "Space Taken"]
 
 @app.route('/')
@@ -48,7 +51,8 @@ def process_video():
             success, img = cap.read()
             if not success:
                 break
-            results = model(img, stream=True)
+            # Predict using the model
+            results = model(img)
             processed_frame = process_frame(img, results)
             out.write(processed_frame)
         
