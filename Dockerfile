@@ -4,36 +4,22 @@ FROM python:3.8-slim
 # Set the working directory in the container to /app
 WORKDIR /app
 
-# Install necessary OS libraries for OpenCV, Git, and general operation
-RUN apt-get update && apt-get install -y \
-    libopencv-dev \
-    libgl1-mesa-glx \
-    git  # Ensure git is installed
+# Install necessary OS libraries for OpenCV and general operation
+RUN apt-get update && apt-get install -y libopencv-dev libgl1-mesa-glx
 
-# Clone YOLOv5 and install dependencies
-RUN git clone --depth 1 --branch v6.0 https://github.com/ultralytics/yolov5.git yolov5
-WORKDIR /app/yolov5
-RUN pip install -r requirements.txt
+# Copy the current directory contents into the container at /app
+# This includes requirements.txt, app.py, and the YOLO model file (best.pt)
+COPY . /app
 
-# Install YOLOv5 dependencies from the cloned directory
-RUN pip install --no-cache-dir -r /app/yolov5/requirements.txt
-
-# Copy only the requirements file first to leverage Docker cache
-COPY requirements.txt /app/
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application
-COPY . /app
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
 
 # Define environment variable
-ENV MODEL_PATH=best.pt  
+ENV MODEL_PATH=https://firebasestorage.googleapis.com/v0/b/parking-with-devops.appspot.com/o/best.pt?alt=media&token=c8a71ce0-7731-400d-93eb-b4b36ce8c709 
 
-# Set PYTHONPATH to include the YOLOv5 folder
-ENV PYTHONPATH="${PYTHONPATH}:/app/yolov5"
+# Run app.py when the container launches
+CMD ["python", "webpython.py"]
 
-# Run gunicorn as the entry point, change to match your Flask app initialization
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
