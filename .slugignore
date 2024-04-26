@@ -19,10 +19,7 @@ data/
 assets/videos/
 assets/images/
 
-# Deployment scripts and non-essential configurations
-deploy_scripts/
-*.yml
-*.yaml
+
 
 # Miscellaneous files
 *.pdf
