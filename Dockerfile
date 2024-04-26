@@ -4,8 +4,11 @@ FROM python:3.8-slim
 # Set the working directory in the container to /app
 WORKDIR /app
 
-# Install necessary OS libraries for OpenCV and general operation
-RUN apt-get update && apt-get install -y libopencv-dev libgl1-mesa-glx
+# Install necessary OS libraries for OpenCV, Git, and general operation
+RUN apt-get update && apt-get install -y \
+    libopencv-dev \
+    libgl1-mesa-glx \
+    git  # Add git here
 
 # Copy only the requirements file first to leverage Docker cache
 COPY requirements.txt /app/
