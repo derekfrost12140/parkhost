@@ -6,6 +6,6 @@ torchvision==0.17.1
 pyyaml
 uuid
 gunicorn
-
+Ultralytics==8.2.3
 
 
