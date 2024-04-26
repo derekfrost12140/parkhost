@@ -1,7 +1,10 @@
 Flask==3.0.3
 flask-cors
 opencv-python-headless==4.9.0.80
-torch==2.2.1  # Specify the version if possible to avoid compatibility issues
-torchvision==0.17.1  # As required by your YOLO version, if applicable
+torch==2.2.1
+torchvision==0.17.1
 pyyaml
 uuid
+gunicorn
+git+https://github.com/ultralytics/yolov5  # This adds YOLOv5 directly from the repository
+
