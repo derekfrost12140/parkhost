@@ -6,7 +6,6 @@ import uuid
 import tempfile
 import logging
 from ultralytics import YOLO
-import supervision as sv
 
 # Set up basic configuration for logging
 logging.basicConfig(level=logging.INFO)
@@ -19,9 +18,9 @@ cors_origins = ["https://main--bespoke-concha-8d1e60.netlify.app"]
 # Enable CORS for all routes and specify origins to allow
 CORS(app, resources={r"/*": {"origins": cors_origins}}, supports_credentials=True)
 
-# Load YOLO model
-model_url = os.getenv("MODEL_URL", "default_model_url_here")
-model = YOLO(model_url)
+# Load YOLO model from a local file or URL
+model_path = os.getenv("MODEL_PATH", "best.pt")  # Use local path for Docker deployment
+model = YOLO(model_path)
 classNames = ["Empty", "Space Taken"]
 
 @app.route('/')
@@ -34,12 +33,16 @@ def process_video():
     try:
         video_url = request.json['url']
         cap = cv2.VideoCapture(video_url)
-        video_info = sv.VideoInfo.from_video_path(video_url)
-
+        
+        # Get video properties
+        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        
         output_filename = f"{uuid.uuid4()}.mp4"
         output_path = os.path.join(tempfile.gettempdir(), output_filename)
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(output_path, fourcc, 20.0, (video_info.width, video_info.height))
+        out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
 
         while True:
             success, img = cap.read()
@@ -48,7 +51,7 @@ def process_video():
             results = model(img, stream=True)
             processed_frame = process_frame(img, results)
             out.write(processed_frame)
-       
+        
         cap.release()
         out.release()
         return jsonify({'message': 'Processing complete', 'video': f'/videos/{output_filename}'})
