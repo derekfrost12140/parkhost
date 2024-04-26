@@ -3,4 +3,4 @@ flask-cors
 opencv-python-headless==4.5.5.62
 torch==2.2.0  # Specify the version if possible to avoid compatibility issues
 torchvision==0.17.0  # As required by your YOLO version, if applicable
-python==3.12.3
+
