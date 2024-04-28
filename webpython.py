@@ -64,7 +64,8 @@ def generate():
         frame = queue.get()
         ret, buffer = cv2.imencode('.jpg', frame)
         frameData = buffer.tobytes()
-        yield (b'--frame\r\nb'Content-Type: image/jpeg\r\n\r\n' + frameData + b'\r\n')
+        yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frameData + b'\r\n')
+
         queue.task_done()
 
 @app.route("/video_feed")
