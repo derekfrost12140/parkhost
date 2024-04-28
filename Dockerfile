@@ -13,7 +13,8 @@ RUN apt-get update && \
 COPY requirements.txt /app/
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt ultralytics
+RUN pip install --no-cache-dir -r requirements.txt ultralytics && \
+    pip freeze > installed_packages.txt # Print all installed packages to file for debugging
 
 # Stage 2: Setup the runtime environment
 FROM python:3.8-slim
@@ -22,6 +23,7 @@ WORKDIR /app
 # Copy from builder stage
 COPY --from=builder /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.8/site-packages
 COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
+COPY --from=builder /app/installed_packages.txt /app/ # Copy the package list for debugging
 COPY . /app
 
 # Install necessary runtime libraries and Gunicorn
@@ -38,4 +40,3 @@ ENV MODEL_PATH=best.pt
 
 # Run app.py when the container launches
 CMD ["gunicorn", "webpython:app", "-b", "0.0.0.0:$PORT"]
-
