@@ -1,40 +1,22 @@
-# Use an official Python runtime as a parent image
-FROM python:3.8-slim as builder
+# Use an official Python runtime as a base image
+FROM python:3.8-slim
 
-# Set the working directory
+# Set the working directory in the container
 WORKDIR /app
-
-# Install necessary OS libraries for OpenCV and general operation
-RUN apt-get update && \
-    apt-get install -y libopencv-dev libgl1-mesa-glx && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy only the requirements.txt at first to leverage Docker cache
-COPY requirements.txt /app/
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt ultralytics 
+# First copy only the requirements.txt to leverage Docker cache
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir --default-timeout=100 -r requirements.txt
 
-# Stage 2: Setup the runtime environment
-FROM python:3.8-slim
-WORKDIR /app
-
-# Copy from builder stage
-COPY --from=builder /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.8/site-packages
-COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
+# Copy the rest of your application's code
 COPY . /app
 
-# Install necessary runtime libraries and Gunicorn
-RUN apt-get update && \
-    apt-get install -y libgl1-mesa-glx && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip install gunicorn
-
-# Make port 5000 available to the world outside this container
-EXPOSE 5000
+# Make port 8080 available to the world outside this container
+EXPOSE 8080
 
 # Define environment variable
-ENV MODEL_PATH=best.pt  
+ENV MODEL_PATH=best.pt
 
-# Run app.py when the container launches
-CMD ["gunicorn", "webpython:app", "-b", "0.0.0.0:$PORT"]
+# Run gunicorn with the app
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "webpython:_flask"]
