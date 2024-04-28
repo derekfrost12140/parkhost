@@ -24,10 +24,11 @@ COPY --from=builder /usr/local/lib/python3.8/site-packages /usr/local/lib/python
 COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
 COPY . /app
 
-# Install necessary runtime libraries only
+# Install necessary runtime libraries and Gunicorn
 RUN apt-get update && \
     apt-get install -y libgl1-mesa-glx && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    pip install gunicorn
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
@@ -36,6 +37,5 @@ EXPOSE 5000
 ENV MODEL_PATH=best.pt  
 
 # Run app.py when the container launches
-# Final line in Dockerfile
 CMD ["gunicorn", "webpython:app", "-b", "0.0.0.0:$PORT"]
 
