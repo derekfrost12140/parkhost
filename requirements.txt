@@ -7,4 +7,4 @@ torchvision==0.17.1  # As required by your YOLO version, if applicable
 pip==24.0
 pyyaml
 uuid
-Ultralytics==8.2.3
+ultralytics==8.2.3
