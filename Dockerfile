@@ -36,4 +36,6 @@ EXPOSE 5000
 ENV MODEL_PATH=best.pt  
 
 # Run app.py when the container launches
-CMD ["python", "webpython.py"]
+# Final line in Dockerfile
+CMD ["gunicorn", "webpython:app", "-b", "0.0.0.0:$PORT"]
+
