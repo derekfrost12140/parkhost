@@ -1,4 +1,4 @@
-gunicorn
+gunicorn==20.1.0
 Flask==3.0.3
 flask-cors
 opencv-python-headless==4.9.0.80
