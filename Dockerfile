@@ -24,4 +24,5 @@ EXPOSE 8080
 # Define environment variable
 ENV MODEL_PATH=best.pt
 
-CMD ["gunicorn", "-w", "4", "-k", "gevent", "-b", "0.0.0.0:$PORT", "webpython:app"]
+# Use shell form of CMD to allow environment variable expansion
+CMD ["sh", "-c", "gunicorn -w 4 -k gevent -b 0.0.0.0:$PORT webpython:app"]
