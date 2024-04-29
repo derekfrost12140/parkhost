@@ -11,5 +11,4 @@ pyyaml
 uuid
 dill
 redis==5.1.0b4  
-rq==1.16.1     
-
+rq
