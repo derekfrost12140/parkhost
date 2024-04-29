@@ -24,5 +24,4 @@ EXPOSE 8080
 # Define environment variable
 ENV MODEL_PATH=best.pt
 
-# Run gunicorn with the app using gevent workers
-CMD ["gunicorn", "-w", "2", "-k", "gevent", "-b", "0.0.0.0:8080", "webpython:app"]
+CMD ["gunicorn", "-w", "4", "-k", "gevent", "-b", "0.0.0.0:$PORT", "webpython:app"]
