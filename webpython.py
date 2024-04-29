@@ -12,7 +12,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 queue = Queue(maxsize=10)
 
 # Configuration variables and global variables
-DEFAULT_VIDEO_PATH = "/Users/ericgotcher/projects/Python/ParkingLot/videos/istockphoto-1046782266-640-adpp-is_dNpvycW4.mp4"
+DEFAULT_VIDEO_PATH = "https://firebasestorage.googleapis.com/v0/b/parking-with-devops.appspot.com/o/istockphoto-1046782266-640-adpp-is_dNpvycW4.mp4?alt=media&token=52ae3e31-e5a5-4beb-8577-2d77f2f71474"
 
 # Get the current directory of the script
 current_directory = os.path.dirname(os.path.realpath(__file__))
