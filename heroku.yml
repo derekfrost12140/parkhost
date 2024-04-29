@@ -1,7 +1,9 @@
 build:
   docker:
     web: Dockerfile
-
+    worker: Dockerfile  # You can use the same Dockerfile if the separation is handled at the command level
+release:
+  image: web
 run:
   web: gunicorn webpython:app --bind 0.0.0.0:$PORT
-
+  worker: python worker.py
