@@ -9,3 +9,4 @@ torchvision==0.17.1  # As required by your YOLO version, if applicable
 pip==24.0
 pyyaml
 uuid
+dill
