@@ -16,6 +16,15 @@ DEFAULT_VIDEO_PATH = "/Users/ericgotcher/projects/Python/ParkingLot/videos/istoc
 MODEL_PATH = "/Users/ericgotcher/projects/runs/detect/train33/weights/best.pt"
 classNames = ["Empty", "Space Taken"]
 
+# Lazy model loading
+model = None
+
+def get_model():
+    global model
+    if model is None:
+        model = YOLO(MODEL_PATH)
+    return model
+
 # Initialize process_thread
 process_thread = None
 
@@ -29,7 +38,7 @@ def process_video(selected_video_path):
     if not cap.isOpened():
         logging.error("Error opening video stream or file")
         return
-    model = YOLO(MODEL_PATH)
+    current_model = get_model()  # Load model on first use
     frame_skip = 5  # Number of frames to skip
     frame_count = 0
 
@@ -43,7 +52,7 @@ def process_video(selected_video_path):
                 continue
             # Reducing frame resolution
             frame = cv2.resize(frame, (640, 480))
-            results = model(frame)
+            results = current_model(frame)
             processed_frame = process_frame(frame, results, classNames)
             if not queue.full():
                 queue.put(processed_frame)
