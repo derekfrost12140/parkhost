@@ -7,7 +7,9 @@ import logging
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-queue = Queue()
+
+# Setting a maxsize for the queue to prevent excessive memory usage
+queue = Queue(maxsize=10)
 
 # Configuration variables and global variables
 DEFAULT_VIDEO_PATH = "/Users/ericgotcher/projects/Python/ParkingLot/videos/istockphoto-1046782266-640-adpp-is_dNpvycW4.mp4"
@@ -16,7 +18,6 @@ classNames = ["Empty", "Space Taken"]
 
 # Initialize process_thread
 process_thread = None
-
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -29,17 +30,24 @@ def process_video(selected_video_path):
         logging.error("Error opening video stream or file")
         return
     model = YOLO(MODEL_PATH)
+    frame_skip = 5  # Number of frames to skip
+    frame_count = 0
 
     try:
         while True:
             if process_thread and process_thread.stopped():
                 break
             success, frame = cap.read()
-            if not success:
-                break
+            if not success or frame_count % frame_skip != 0:
+                frame_count += 1
+                continue
+            # Reducing frame resolution
+            frame = cv2.resize(frame, (640, 480))
             results = model(frame)
             processed_frame = process_frame(frame, results, classNames)
-            queue.put(processed_frame)
+            if not queue.full():
+                queue.put(processed_frame)
+            frame_count += 1
     finally:
         cap.release()
         logging.info("Video capture released")
@@ -65,7 +73,6 @@ def generate():
         ret, buffer = cv2.imencode('.jpg', frame)
         frameData = buffer.tobytes()
         yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frameData + b'\r\n')
-
         queue.task_done()
 
 @app.route("/video_feed")
@@ -74,7 +81,7 @@ def video_feed():
 
 @app.route("/")
 def parking():
-    return render_template('lots.html')  
+    return render_template('lots.html')
 
 class StoppableThread(Thread):
     def __init__(self, *args, **kwargs):
@@ -116,4 +123,3 @@ def select_lot():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
-
