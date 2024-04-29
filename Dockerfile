@@ -4,14 +4,16 @@ FROM python:3.8-slim
 # Set the working directory in the container
 WORKDIR /app
 
-# Install necessary OS libraries for OpenCV
+# Install necessary OS libraries for OpenCV and gevent
 RUN apt-get update && \
-    apt-get install -y libgl1-mesa-glx libglib2.0-0
+    apt-get install -y libgl1-mesa-glx libglib2.0-0 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install any needed packages specified in requirements.txt
 # First copy only the requirements.txt to leverage Docker cache
 COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt 
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of your application's code
 COPY . /app
@@ -22,7 +24,5 @@ EXPOSE 8080
 # Define environment variable
 ENV MODEL_PATH=best.pt
 
-# Run gunicorn with the app using fewer workers to save memory
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8080", "webpython:app"]
-
-
+# Run gunicorn with the app using gevent workers
+CMD ["gunicorn", "-w", "2", "-k", "gevent", "-b", "0.0.0.0:8080", "webpython:app"]
