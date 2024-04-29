@@ -10,6 +10,6 @@ pip==24.0
 pyyaml
 uuid
 dill
-redis==7.4.2  
+redis==5.1.0b4  
 rq==1.16.1     
 
