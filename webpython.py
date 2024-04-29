@@ -13,7 +13,13 @@ queue = Queue(maxsize=10)
 
 # Configuration variables and global variables
 DEFAULT_VIDEO_PATH = "/Users/ericgotcher/projects/Python/ParkingLot/videos/istockphoto-1046782266-640-adpp-is_dNpvycW4.mp4"
-MODEL_PATH = "/Users/ericgotcher/projects/runs/detect/train33/weights/best.pt"
+
+# Get the current directory of the script
+current_directory = os.path.dirname(os.path.realpath(__file__))
+
+# Set the MODEL_PATH to the correct location of best.pt
+MODEL_PATH = os.path.join(current_directory, "best.pt")
+
 classNames = ["Empty", "Space Taken"]
 
 # Lazy model loading
@@ -95,13 +101,14 @@ def parking():
 class StoppableThread(Thread):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        this._stop_event = False
+        self._stop_event = False
 
     def stop(self):
-        this._stop_event = True
+        self._stop_event = True
 
     def stopped(self):
-        return this._stop_event
+        return self._stop_event
+
 
 @app.route("/select_lot", methods=["POST"])
 def select_lot():
