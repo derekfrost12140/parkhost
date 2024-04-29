@@ -23,4 +23,5 @@ EXPOSE 8080
 ENV MODEL_PATH=best.pt
 
 # Run gunicorn with the app
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "webpython:_flask"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "webpython:app"]
+
