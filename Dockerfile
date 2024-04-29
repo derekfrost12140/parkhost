@@ -22,6 +22,7 @@ EXPOSE 8080
 # Define environment variable
 ENV MODEL_PATH=best.pt
 
-# Run gunicorn with the app
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "webpython:app"]
+# Run gunicorn with the app using fewer workers to save memory
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8080", "webpython:app"]
+
 
