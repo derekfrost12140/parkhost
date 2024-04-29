@@ -4,7 +4,7 @@ from ultralytics import YOLO
 from queue import Queue
 from threading import Thread
 import logging
-
+import os
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
