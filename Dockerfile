@@ -25,4 +25,4 @@ EXPOSE 8080
 ENV MODEL_PATH=best.pt
 
 # Use shell form of CMD to allow environment variable expansion
-CMD ["sh", "-c", "gunicorn -w 4 -k gevent -b 0.0.0.0:$PORT webpython:app"]
+CMD ["sh", "-c", "gunicorn -w 2 -k gevent -b 0.0.0.0:$PORT webpython:app"]
