@@ -82,7 +82,7 @@ def video_feed():
     return Response(generate(), mimetype="multipart/x-mixed-replace; boundary=frame")
 @app.route("/")
 def parking():
-    return render_template('lots.html')
+    return render_template('video_feed.html')
 class StoppableThread(Thread):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
