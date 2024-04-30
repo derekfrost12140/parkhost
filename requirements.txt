@@ -11,3 +11,4 @@ pyyaml
 uuid
 dill
 celery
+redis
