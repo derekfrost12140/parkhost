@@ -2,7 +2,7 @@ from flask import Flask, Response, render_template, request
 import cv2
 from ultralytics import YOLO
 from queue import Queue
-import logging
+import time
 import os
 from celery import Celery
 
@@ -17,6 +17,13 @@ app.config['CELERY_RESULT_BACKEND'] = os.environ.get('REDIS_URL', 'redis://local
 def make_celery(app):
     celery = Celery(app.import_name, broker=app.config['CELERY_BROKER_URL'], backend=app.config['CELERY_RESULT_BACKEND'])
     celery.conf.update(app.config)
+    TaskBase = celery.Task
+    class ContextTask(TaskBase):
+        abstract = True
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+    celery.Task = ContextTask
     return celery
 
 celery = make_celery(app)
@@ -25,9 +32,7 @@ celery = make_celery(app)
 queue = Queue(maxsize=10)
 
 # Configuration variables and global variables
-DEFAULT_VIDEO_PATH = "https://firebasestorage.googleapis.com/v0/b/parking-with-devops.appspot.com/o/istockphoto-1046782266-640-adpp-is_dNpvycW4.mp4?alt=media&token=52ae3e31-e5a5-4beb-8577-2d77f2f71474"
-current_directory = os.path.dirname(os.path.realpath(__file__))
-MODEL_PATH = os.path.join(current_directory, "best.pt")
+MODEL_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "best.pt")
 classNames = ["Empty", "Space Taken"]
 
 # Lazy model loading
@@ -43,7 +48,7 @@ def get_model():
 def process_video(selected_video_path):
     cap = cv2.VideoCapture(selected_video_path)
     if not cap.isOpened():
-        logging.error("Error opening video stream or file")
+        print("Error opening video stream or file")
         return
     current_model = get_model()
     frame_skip = 5
@@ -62,7 +67,7 @@ def process_video(selected_video_path):
             frame_count += 1
     finally:
         cap.release()
-        logging.info("Video capture released")
+        print("Video capture released")
 
 def process_frame(frame, results, classNames):
     for r in results:
@@ -75,16 +80,18 @@ def draw_box(frame, box, classNames):
     x1, y1, x2, y2 = map(int, box.xyxy[0])
     cls = int(box.cls[0])
     color = (0, 255, 0) if classNames[cls] == "Empty" else (0, 0, 255)
-    if box.conf[0] > 0.43 and x2-x1 < 100:
-        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 1)
+    cv2.rectangle(frame, (x1, y1), (x2, y2), color, 1)
 
 def generate():
     while True:
-        frame = queue.get()
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frameData = buffer.tobytes()
-        yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frameData + b'\r\n')
-        queue.task_done()
+        if not queue.empty():
+            frame = queue.get()
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frameData = buffer.tobytes()
+            yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frameData + b'\r\n')
+            queue.task_done()
+        else:
+            time.sleep(0.1)  # Sleep briefly to avoid tight loop if queue is empty.
 
 @app.route("/video_feed")
 def video_feed():
@@ -110,7 +117,6 @@ def select_lot():
     selected_video_path = video_paths.get(lot_number)
     if not selected_video_path:
         return "Invalid lot number", 400
-    logging.info(f"Selected lot: {lot_number}, video: {selected_video_path}")
     process_video.delay(selected_video_path)
     return "Video selected successfully"
 
